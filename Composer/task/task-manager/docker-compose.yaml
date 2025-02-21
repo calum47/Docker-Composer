@@ -1,0 +1,46 @@
+name: task-manager
+
+version: "3.8"
+
+services:
+  task-manager-db:
+    container_name: task-manager-db
+    image: mongo:6.0.8
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    env_file:
+      - .env
+    networks:
+      - task-manager-network
+    volumes:
+      - task-manager-data:/data/db
+
+  task-manager-app:
+    container_name: task-manager-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - task-manager-db
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_HOST_NAME: task-manager-db
+      MONGO_PORT_NUMBER: 27017
+    env_file:
+      - .env
+    networks:
+      - task-manager-network
+
+networks:
+  task-manager-network:
+
+volumes:
+  task-manager-data:
